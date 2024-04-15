@@ -12,12 +12,17 @@ def extract_text_from_pdf(pdf_path):
             text += reader.pages[page_num].extract_text()
     return text
 
-
 def extract_text_from_docx(docx_path):
     doc = docx.Document(docx_path)
     text = ""
     for para in doc.paragraphs:
         text += para.text
+    return text
+
+def extract_text_from_csv(csv_path):
+    with open(csv_path, 'r') as file:
+        lines = file.readlines()
+        text = ' '.join(lines)
     return text
 
 def extract_emails_and_phone_numbers(text):
@@ -28,14 +33,15 @@ def extract_emails_and_phone_numbers(text):
     phones = '\n'.join(phones)
     return emails, phones
 
-
 def process_file(file_path):
     if file_path.endswith('.pdf'):
         text = extract_text_from_pdf(file_path)
     elif file_path.endswith('.docx'):
         text = extract_text_from_docx(file_path)
+    elif file_path.endswith('.csv'):
+        text = extract_text_from_csv(file_path)
     else:
-        return "", ""  # Skip non-PDF and non-DOCX files
+        return "", ""  # Skip non-PDF, non-DOCX, and non-CSV files
     return extract_emails_and_phone_numbers(text)
 
 def process_folder(folder_path):
@@ -62,12 +68,3 @@ def write_to_excel(data, excel_path):
         worksheet.write(row, 2, phones)
         row += 1
     workbook.save(excel_path)  # Save workbook to Excel file
-
-if __name__ == "__main__":
-    folder_path = input("Enter the path of the folder containing resumes: ").strip()
-    output_path = input("Enter the path where you want to save the output file (with extension .xls): ").strip()
-    data = process_folder(folder_path)
-    if data:
-        write_to_excel(data, output_path)
-    else:
-        print("No email addresses or phone numbers found in the resumes.")
